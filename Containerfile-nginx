@@ -12,7 +12,6 @@ RUN apt update \
 
 RUN  apt install -y \
   curl \
-  php8.4-fpm \
   php8.4-pgsql \
   php8.4-xml \
   php8.4-bcmath \
@@ -23,7 +22,9 @@ RUN  apt install -y \
   composer \
   tar \
   gzip \
-  imagemagick
+  imagemagick \
+  nginx \
+  nginx-common
 
 RUN apt clean \
   && apt autoremove -y \
@@ -40,16 +41,12 @@ RUN mkdir -p /usr/share/webapps \
 
 RUN  cd /usr/share/webapps/pixelfed \
   && composer install --no-ansi --no-interaction --optimize-autoloader \
-  && chown -R www-data:www-data /usr/share/webapps/pixelfed \
-  && sed -i "/listen = / s/= .*/ = 0.0.0.0:9001/" /etc/php/8.4/fpm/pool.d/www.conf \
-  && sed -i "/^error_log =/ s/= .*/= \/dev\/stdout/" /etc/php/8.4/fpm/php-fpm.conf \
-  && sed -i "/access.log =/ s/^.*$/access.log = \/dev\/stdout/" /etc/php/8.4/fpm/pool.d/www.conf
+  && chown -R www-data:www-data /usr/share/webapps/pixelfed
 
-
-COPY entrypoint.sh /entrypoint.sh
+COPY default.conf /etc/nginx/sites-available/default
 
 WORKDIR /usr/share/webapps/pixelfed
 
-EXPOSE 9001
+EXPOSE 80
 
-ENTRYPOINT [ "/entrypoint.sh" ]
+ENTRYPOINT [ "/etc/init.d/nginx", "start" ]
