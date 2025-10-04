@@ -71,7 +71,7 @@ services:
       AP_SHAREDINBOX: ${AP_SHAREDINBOX:?Please provide variable AP_SHAREDINBOX}
 
       # Experimental Configuration
-EXP_EMC: ${EXP_EMC:?Please provide variable EXP_EMC}
+      EXP_EMC: ${EXP_EMC:?Please provide variable EXP_EMC}
 
     ports:
       - "9001:9001"
