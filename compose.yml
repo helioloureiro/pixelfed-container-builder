@@ -1,0 +1,35 @@
+services:
+  pixelfed:
+    container_name: pixelfed
+    image: pixelfed:v0.12.6
+    restart: unless-stopped
+    env-file: .env
+    ports:
+      - "9001:9001"
+    volumes:
+      - "./storage:/usr/share/webapps/pixelfed/storage"
+    depends:
+      - postgres
+      - redis
+
+  postgres:
+    container_name: postgres
+    image: docker.io/library/postgres:latest
+    restart: unless-stopped
+    env-file: .env
+    env-file: .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - "./postgres:/var/lib/postgresql"
+
+  redis:
+    container_name: redis
+    image: docker.io/library/redis:latest
+    restart: unless-stopped
+    env-file: .env
+    ports:
+      - "6379:6379"
+    volumes:
+      - "./redis:/data"
+
