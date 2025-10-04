@@ -38,8 +38,8 @@ RUN  cd /usr/share/webapps/pixelfed \
   && composer install --no-ansi --no-interaction --optimize-autoloader \
   && chown -R www-data:www-data /usr/share/webapps/pixelfed \
   && sed -i "/listen = / s/= .*/ = 0.0.0.0:9001/" /etc/php/8.4/fpm/pool.d/www.conf \
-  && sed -i "/^error_log =/ s/= .*/= \/proc\/self\/fd\/2/" /etc/php/8.4/fpm/php-fpm.conf \
-  && sed -i "/access.log =/ s/^.*$/access.log = \/proc\/self\/fd\/2/" /etc/php/8.4/fpm/pool.d/www.conf
+  && sed -i "/^error_log =/ s/= .*/= \/dev\/stdout/" /etc/php/8.4/fpm/php-fpm.conf \
+  && sed -i "/access.log =/ s/^.*$/access.log = \/dev\/stdout/" /etc/php/8.4/fpm/pool.d/www.conf
 
 
 COPY entrypoint.sh /entrypoint.sh
