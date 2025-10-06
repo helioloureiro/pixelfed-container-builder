@@ -38,7 +38,7 @@ initialize() {
     cd /usr/share/webapps/pixelfed
     php artisan storage:link  || \
       logerror "storage link failed"
-    php artisan migrate  || \
+    php artisan migrate --force || \
       logerror "failed to migrated data"
     touch /usr/share/webapps/pixelfed/storage/.initialized
     }
