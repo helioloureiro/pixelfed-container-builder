@@ -1,0 +1,25 @@
+#! /usr/bin/env bash
+
+
+exiting(){
+    echo "terminating container"
+    exit 0
+}
+
+trap exiting SIGTERM SIGKILL SIGUSR1
+
+do_monitor() {
+    while true
+    do
+        now=$(date)
+        echo "[ $now ] up and running"
+        sleep 300
+    done
+}
+
+
+sleep 3
+do_monitor
+
+tail -F /dev/stdout /dev/stderr
+

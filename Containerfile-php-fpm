@@ -1,0 +1,23 @@
+ARG VERSION
+FROM pixelfed:$VERSION
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+
+RUN  apt install -y \
+    php8.4-fpm \
+  && apt clean \
+  && apt autoremove -y
+
+RUN  sed -i "/listen = / s/= .*/ = 0.0.0.0:9001/" /etc/php/8.4/fpm/pool.d/www.conf \
+  && sed -i "/^error_log =/ s/= .*/= \/dev\/stdout/" /etc/php/8.4/fpm/php-fpm.conf \
+  && sed -i "/access.log =/ s/^.*$/access.log = \/dev\/stdout/" /etc/php/8.4/fpm/pool.d/www.conf
+
+
+COPY entrypoint.sh /entrypoint.sh
+
+WORKDIR /usr/share/webapps/pixelfed
+
+EXPOSE 9001
+
+ENTRYPOINT [ "/entrypoint.sh" ]

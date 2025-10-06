@@ -12,8 +12,8 @@ RUN apt update \
 
 RUN  apt install -y \
   curl \
-  php8.4-fpm \
   php8.4-pgsql \
+  php8.4-redis \
   php8.4-xml \
   php8.4-bcmath \
   php8.4-curl \
@@ -23,12 +23,11 @@ RUN  apt install -y \
   composer \
   tar \
   gzip \
-  imagemagick
+  imagemagick \
+  net-tools
 
 RUN apt clean \
-  && apt autoremove -y \
-  && rm -rf /usr/share/doc \
-  && rm -rf /var/lib/apt /var/lib/dpkg
+  && apt autoremove -y
 
 ARG VERSION
 RUN mkdir -p /usr/share/webapps \
@@ -40,16 +39,11 @@ RUN mkdir -p /usr/share/webapps \
 
 RUN  cd /usr/share/webapps/pixelfed \
   && composer install --no-ansi --no-interaction --optimize-autoloader \
-  && chown -R www-data:www-data /usr/share/webapps/pixelfed \
-  && sed -i "/listen = / s/= .*/ = 0.0.0.0:9001/" /etc/php/8.4/fpm/pool.d/www.conf \
-  && sed -i "/^error_log =/ s/= .*/= \/dev\/stdout/" /etc/php/8.4/fpm/php-fpm.conf \
-  && sed -i "/access.log =/ s/^.*$/access.log = \/dev\/stdout/" /etc/php/8.4/fpm/pool.d/www.conf
+  && find . -type d -exec chmod 755 {} \; \
+  && find . -type f -exec chmod 644 {} \; \
+  && mkdir -p /usr/share/webapps/pixelfed/storage \
+  && chown -R www-data:www-data /usr/share/webapps/pixelfed
 
-
-COPY entrypoint.sh /entrypoint.sh
-
-WORKDIR /usr/share/webapps/pixelfed
-
-EXPOSE 9001
+COPY entrypoint.sh-dummy /entrypoint.sh
 
 ENTRYPOINT [ "/entrypoint.sh" ]

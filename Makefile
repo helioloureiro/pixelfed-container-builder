@@ -4,9 +4,17 @@ all:
 
 build:
 	podman build \
+		-t pixelfed:$(VERSION) \
+		--label=VERSION=$(VERSION) \
+		--build-arg=VERSION=$(VERSION) \
+		--file=Containerfile \
+		.
+
+	podman build \
 		-t pixelfed-php-fpm:$(VERSION) \
 		--label=VERSION=$(VERSION) \
 		--build-arg=VERSION=$(VERSION) \
+		--file=Containerfile-php-fpm \
 		.
 
 	podman build \

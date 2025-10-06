@@ -1,7 +1,7 @@
 services:
-  pixelfed:
-    container_name: pixelfed
-    image: pixelfed:v0.12.6
+  pixelfed-php-fpm:
+    container_name: pixelfed-php-fpm
+    image: pixelfed-php-fpm:v0.12.6
     restart: unless-stopped
     env-file: .env
     environment:
@@ -21,7 +21,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:?Please provide variable POSTGRES_DB}
       REDIS_HOST: ${REDIS_HOST:?Please provide variable REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT:?Please provide variable REDIS_PORT}
-      REDIS_PASSWORD: ${REDIS_PASSWORD:?Please provide variable REDIS_PASSWORD}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
       MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:?Please provide variable MAIL_FROM_ADDRESS}
       MAIL_HOST: ${MAIL_HOST:?Please provide variable MAIL_HOST}
       MAIL_PORT: ${MAIL_PORT:?Please provide variable MAIL_PORT}
@@ -39,7 +39,6 @@ services:
       OPEN_REGISTRATION: ${OPEN_REGISTRATION:?Please provide variable OPEN_REGISTRATION}
       ENFORCE_EMAIL_VERIFICATION: ${ENFORCE_EMAIL_VERIFICATION:?Please provide variable ENFORCE_EMAIL_VERIFICATION}
       PF_MAX_USERS: ${PF_MAX_USERS:?Please provide variable PF_MAX_USERS}
-      OAUTH_ENABLED: ${OAUTH_ENABLED:?Please provide variable OAUTH_ENABLED}
       ENABLE_CONFIG_CACHE: ${ENABLE_CONFIG_CACHE:?Please provide variable ENABLE_CONFIG_CACHE}
       INSTANCE_DISCOVER_PUBLIC: ${INSTANCE_DISCOVER_PUBLIC:?Please provide variable INSTANCE_DISCOVER_PUBLIC}
 
@@ -65,7 +64,6 @@ services:
       HORIZON_PREFIX: ${HORIZON_PREFIX:?Please provide variable HORIZON_PREFIX}
 
       # ActivityPub Configuration
-      AP_REMOTE_FOLLOW: ${AP_REMOTE_FOLLOW:?Please provide variable AP_REMOTE_FOLLOW}
       AP_INBOX: ${AP_INBOX:?Please provide variable AP_INBOX}
       AP_OUTBOX: ${AP_OUTBOX:?Please provide variable AP_OUTBOX}
       AP_SHAREDINBOX: ${AP_SHAREDINBOX:?Please provide variable AP_SHAREDINBOX}
@@ -76,10 +74,99 @@ services:
     ports:
       - "9001:9001"
     volumes:
-      - "./storage:/usr/share/webapps/pixelfed/storage"
+      - "pixelfed-storage:/usr/share/webapps/pixelfed/storage"
+      - "./.env:/usr/share/webapps/pixelfed/.env:ro"
     depends:
       - postgres
       - redis
+    network:
+      - host
+
+  pixelfed-nginx:
+    container_name: pixelfed-nginx
+    image: pixelfed-nginx:v0.12.6
+    restart: unless-stopped
+    env-file: .env
+    environment:
+      APP_NAME: ${APP_NAME:?Please provide variable APP_NAME}
+      APP_URL: ${APP_URL:?Please provide variable APP_URL}
+      APP_DOMAIN: ${APP_DOMAIN:?Please provide variable APP_DOMAIN}
+      ADMIN_DOMAIN: ${ADMIN_DOMAIN:?Please provide variable ADMIN_DOMAIN}
+      SESSION_DOMAIN: ${SESSION_DOMAIN:?Please provide variable SESSION_DOMAIN}
+      DB_CONNECTION: ${DB_CONNECTION:?Please provide variable DB_CONNECTION}
+      DB_HOST: ${DB_HOST:?Please provide variable DB_HOST}
+      DB_PORT: ${DB_PORT:?Please provide variable DB_PORT}
+      DB_DATABASE: ${DB_DATABASE:?Please provide variable DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME:?Please provide variable DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD:?Please provide variable DB_PASSWORD}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Please provide variable POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER:?Please provide variable POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB:?Please provide variable POSTGRES_DB}
+      REDIS_HOST: ${REDIS_HOST:?Please provide variable REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT:?Please provide variable REDIS_PORT}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:?Please provide variable MAIL_FROM_ADDRESS}
+      MAIL_HOST: ${MAIL_HOST:?Please provide variable MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT:?Please provide variable MAIL_PORT}
+      MAIL_USERNAME: ${MAIL_USERNAME:?Please provide variable MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:?Please provide variable MAIL_PASSWORD}
+      IMAGE_DRIVER: ${IMAGE_DRIVER:?Please provide variable IMAGE_DRIVER}
+      ACTIVITY_PUB: ${ACTIVITY_PUB:?Please provide variable ACTIVITY_PUB}
+      AP_REMOTE_FOLLOW: ${AP_REMOTE_FOLLOW:?Please provide variable AP_REMOTE_FOLLOW}
+      OAUTH_ENABLED: ${OAUTH_ENABLED:?Please provide variable OAUTH_ENABLED}
+      APP_KEY: ${APP_KEY:?Please provide variable APP_KEY}
+      APP_ENV: ${APP_ENV:?Please provide variable APP_ENV}
+      APP_DEBUG: ${APP_DEBUG:?Please provide variable APP_DEBUG}
+
+      # Instance Configuration
+      OPEN_REGISTRATION: ${OPEN_REGISTRATION:?Please provide variable OPEN_REGISTRATION}
+      ENFORCE_EMAIL_VERIFICATION: ${ENFORCE_EMAIL_VERIFICATION:?Please provide variable ENFORCE_EMAIL_VERIFICATION}
+      PF_MAX_USERS: ${PF_MAX_USERS:?Please provide variable PF_MAX_USERS}
+      ENABLE_CONFIG_CACHE: ${ENABLE_CONFIG_CACHE:?Please provide variable ENABLE_CONFIG_CACHE}
+      INSTANCE_DISCOVER_PUBLIC: ${INSTANCE_DISCOVER_PUBLIC:?Please provide variable INSTANCE_DISCOVER_PUBLIC}
+
+      # Media Configuration
+      PF_OPTIMIZE_IMAGES: ${PF_OPTIMIZE_IMAGES:?Please provide variable PF_OPTIMIZE_IMAGES}
+      IMAGE_QUALITY: ${IMAGE_QUALITY:?Please provide variable IMAGE_QUALITY}
+      MAX_PHOTO_SIZE: ${MAX_PHOTO_SIZE:?Please provide variable MAX_PHOTO_SIZE}
+      MAX_CAPTION_LENGTH: ${MAX_CAPTION_LENGTH:?Please provide variable MAX_CAPTION_LENGTH}
+      MAX_ALBUM_LENGTH: ${MAX_ALBUM_LENGTH:?Please provide variable MAX_ALBUM_LENGTH}
+
+      TRUST_PROXIES: ${TRUST_PROXIES:?Please provide variable TRUST_PROXIES}
+
+      # Redis Configuration
+      REDIS_CLIENT: ${REDIS_CLIENT:?Please provide variable REDIS_CLIENT}
+      REDIS_SCHEME: ${REDIS_SCHEME:?Please provide variable REDIS_SCHEME}
+
+      # Laravel Configuration
+      SESSION_DRIVER: ${SESSION_DRIVER:?Please provide variable SESSION_DRIVER}
+      CACHE_DRIVER: ${CACHE_DRIVER:?Please provide variable CACHE_DRIVER}
+      QUEUE_DRIVER: ${QUEUE_DRIVER:?Please provide variable QUEUE_DRIVER}
+      BROADCAST_DRIVER: ${BROADCAST_DRIVER:?Please provide variable BROADCAST_DRIVER}
+      LOG_CHANNEL: ${LOG_CHANNEL:?Please provide variable LOG_CHANNEL}
+      HORIZON_PREFIX: ${HORIZON_PREFIX:?Please provide variable HORIZON_PREFIX}
+
+      # ActivityPub Configuration
+      AP_INBOX: ${AP_INBOX:?Please provide variable AP_INBOX}
+      AP_OUTBOX: ${AP_OUTBOX:?Please provide variable AP_OUTBOX}
+      AP_SHAREDINBOX: ${AP_SHAREDINBOX:?Please provide variable AP_SHAREDINBOX}
+
+      # Experimental Configuration
+      EXP_EMC: ${EXP_EMC:?Please provide variable EXP_EMC}
+
+      POST_MAX_SIZE: ${POST_MAX_SIZE:? Please provide variable POST_MAX_SIZE}
+
+    ports:
+      - "8080:80"
+    volumes:
+      - "pixelfed-storage:/usr/share/webapps/pixelfed/storage"
+      - "./.env:/usr/share/webapps/pixelfed/.env:ro"
+    depends:
+      - postgres
+      - redis
+      - pixelfed-php-fpm
+    network:
+      - host
 
   postgres:
     container_name: postgres
@@ -94,7 +181,9 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - "./postgres:/var/lib/postgresql"
+      - "pixelfed-postgres:/var/lib/postgresql"
+    network:
+      - host
 
   redis:
     container_name: redis
@@ -102,9 +191,15 @@ services:
     restart: unless-stopped
     env-file: .env
     environment:
-      REDISCLI_AUTH: ${REDISCLI_AUTH:?Please provide variable REDISCLI_AUTH}
+      REDISCLI_AUTH: ${REDISCLI_AUTH}
     ports:
       - "6379:6379"
     volumes:
-      - "./redis:/data"
+      - "pixelfed-redis:/data"
+    network:
+      - host
 
+volumes:
+  pixelfed-redis:
+  pixelfed-postgres:
+  pixelfed-storage:

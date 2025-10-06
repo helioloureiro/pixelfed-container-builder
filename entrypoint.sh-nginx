@@ -1,0 +1,33 @@
+#! /usr/bin/env bash
+
+exiting(){
+    echo "terminating container"
+    /etc/init.d/nginx stop
+    exit 0
+}
+
+trap exiting SIGTERM SIGKILL SIGUSR1
+
+do_monitor() {
+    while true
+    do
+        now=$(date)
+        result=$(/etc/init.d/nginx status | grep "is running")
+        if [ $? -ne 0 ]; then
+            echo "[ $now ] nginx failed" >> /dev/stderr
+            exit 1
+        else
+            echo "[ $now ] $result" >> /dev/stdout
+        fi
+        sleep 300
+    done
+}
+
+
+/etc/init.d/nginx start
+sleep 3
+# do_monitor &
+
+tail -F /dev/stdout /dev/stderr
+
+# wait
